@@ -30,7 +30,6 @@ void game_loop(){
         rrender(gcurrent());
         if( ! handle_game_logic()) break;
 
-        /* wprintw(rgetwin(), "%c", c); */
         switch(c){	
             case KEY_LEFT:
                 // Rotate left

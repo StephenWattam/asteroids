@@ -163,7 +163,7 @@ void plot_with_wrap(int c, int r, char ch){
 
 // Draw the ship
 #define PIPI (2*M_PI)
-void render_ship( positional_entity_t* e, float x, float y){
+char render_ship( positional_entity_t* e, float x, float y){
     orientation_t eo = e->orientation;
     
     char c = 's';
@@ -173,6 +173,8 @@ void render_ship( positional_entity_t* e, float x, float y){
     if(eo > (5 * PIPI/8) && eo < (7 * PIPI/8) ) c = '<';
 
     mvwprintw( main_win, round(y), round(x), "%c", c);
+
+    return c;
 }
 
 
@@ -217,7 +219,7 @@ void rotate(bitmap_t* bmp, bitmap_t* newbmp, orientation_t orientation){
 
 
 // Render a bitmap using sampling at a given place
-void subpixel( bitmap_t* bmp, positional_entity_t* e ){
+void subpixel( bitmap_t* bmp, positional_entity_t* e, char ch ){
 
     // Compute location in curses-space
     float x  = trans_horz(e->x);
@@ -259,7 +261,7 @@ void subpixel( bitmap_t* bmp, positional_entity_t* e ){
 
             // If this pixel is on, plot it on the curses plane
             if(bmp_get( bmp, bmpx, bmpy ))
-                plot_with_wrap(i, j, '#');
+                plot_with_wrap(i, j, ch);
         }
     }
 }
@@ -283,15 +285,15 @@ void render_entity( positional_entity_t* e ){
     switch(e->type){
         case ship:
             rotate( ship_bmp, ship_cache, e->orientation );
-            subpixel(ship_cache, e);
-            render_ship(e, ex, ey);
+            char ch = render_ship(e, ex, ey);
+            subpixel(ship_cache, e, ch);
             break;
         case asteroid:
 #ifdef ASTEROIDS_ROTATE
             rotate( asteroid_bmp, asteroid_cache, e->orientation );
-            subpixel(asteroid_cache, e);
+            subpixel(asteroid_cache, e, 'a');
 #else
-            subpixel(asteroid_bmp, e);
+            subpixel(asteroid_bmp, e, 'a');
 #endif
             mvwprintw( main_win, round(ey), round(ex), "a");
             break;
@@ -364,9 +366,4 @@ void rsummarise_game( game_state_t* current ){
 }
 
 /* ------------------------------------------------------------------------- */
-
-/* Return a handle to the main window.  FIXME: this is an ugly hack and shouldn't be used. */
-WINDOW* rgetwin(){
-    return main_win;
-}
 
