@@ -1,4 +1,4 @@
-#define MAX_ENTITIES 1000
+#define MAX_ENTITIES 100
 
 typedef enum entity_type{
     ship,       // 0
@@ -41,7 +41,6 @@ typedef struct positional_entity{
 
 // Keeps a list of entities.
 typedef struct scene{
-    unsigned int count;             // current number in array
     unsigned int max;               // Don't bother rendering over this number
     positional_entity_t entities[MAX_ENTITIES];  // pointer to head of array
 } scene_t;
@@ -71,26 +70,21 @@ positional_entity_t* new_entity(scene_t* scene, entity_type_t type,
         orientation_t orientation, orientation_t dorientation,
         float size,
         int lifespan, bool collides, bool friction){
+
     int spare = -1;
     for(int i=0; i<scene->max; i++)
         if(scene->entities[i].type == null){
             spare = i;
             break;
         }
-    if(spare < 0) spare = scene->count;
+    if(spare < 0) spare = scene->max + 1;
 
-    // TODO: handle edge case where spare > MAX_ENTITIES
+    // TODO: handle edge case where spare (positional_entity_t> MAX_ENTITIES
+    if( spare > MAX_ENTITIES - 1 ) return (positional_entity_t*)0;
 
     // Keep track of max
     if(spare > scene->max)
         scene->max = spare;
-
-    // Add one to count
-    scene->count ++;
-
-    // maintain max index list
-    if(scene->count-1 > scene->max)
-        scene->max = scene->count - 1;
 
     // create entity
     new_entity_raw( &scene->entities[spare], type, 
@@ -112,7 +106,6 @@ scene_t* new_scene(){
     scene_t* new        = (scene_t*)malloc(sizeof(scene_t));
 
     // This one item is the player's ship.
-    new->count          = 0;
     new->max            = 0;
 
     // Init null entities so we can be lazy later

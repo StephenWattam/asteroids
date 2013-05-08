@@ -7,10 +7,10 @@
 // NOTE: these should be symmetric around 0.
 // Some of the rendering libraries make assumptions 
 // that are in the TODO list :-)
-#define BOUNDS_XMIN -20000;
-#define BOUNDS_YMIN -30000;
-#define BOUNDS_XMAX 20000;
-#define BOUNDS_YMAX 30000;
+#define BOUNDS_XMIN -30000;
+#define BOUNDS_YMIN -20000;
+#define BOUNDS_XMAX 30000;
+#define BOUNDS_YMAX 20000;
 
 // Sizes of things in the game world
 #define SHIP_SIZE 2000
