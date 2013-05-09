@@ -3,23 +3,14 @@
 // Handy for trig
 #define M_PI 3.14159265358979323846264338327
 
-// Game world limits
-// NOTE: these should be symmetric around 0.
-// Some of the rendering libraries make assumptions 
-// that are in the TODO list :-)
-#define BOUNDS_XMIN -30000;
-#define BOUNDS_YMIN -20000;
-#define BOUNDS_XMAX 30000;
-#define BOUNDS_YMAX 20000;
-
 // Sizes of things in the game world
 #define SHIP_SIZE 2000
 #define BULLET_SIZE 10
 
 // Bullet properties
-#define BULLET_LIFESPAN 500
-#define BULLET_SPEED 200
-#define RECOIL_SPEED 10
+/* #define BULLET_LIFESPAN 500 */
+/* #define BULLET_SPEED 200 */
+/* #define RECOIL_SPEED 10 */
 
 // and asteroid properties
 #define ASTEROID_SIZE_VARIABILITY 2000
@@ -79,7 +70,7 @@ typedef struct game_state{
 game_state_t* current_game;
 
 // Make a new game with a given set of entities
-void gnew(){
+void gnew(int width, int height){
     game_state_t* new_game = (game_state_t*)malloc(sizeof(game_state_t));
     
     new_game->score      = 0;
@@ -91,12 +82,12 @@ void gnew(){
     /* new_game->player     = &new_game->scene[0]; */
 
 
-    // Default bounds.
-    // TODO: make this depend on aspect ratio of renderer in some way
-    new_game->bounds.xmin   = BOUNDS_XMIN;
-    new_game->bounds.ymin   = BOUNDS_YMIN;
-    new_game->bounds.xmax   = BOUNDS_XMAX;
-    new_game->bounds.ymax   = BOUNDS_YMAX;
+    // plane bounds.
+    // Computed from an aspect ratio and a diagonal size
+    new_game->bounds.xmin   = -width/2;
+    new_game->bounds.ymin   = -height/2;
+    new_game->bounds.xmax   = width/2;
+    new_game->bounds.ymax   = height/2;
 
     // Create a new ship
     new_game->player = new_ship(new_game->scene, 0, 0, SHIP_SIZE);

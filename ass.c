@@ -6,6 +6,9 @@
 #include "input.c"
 #include "physics.c"
 
+/* GAME_SCALE */
+#define GAME_SCALE 400  /* Relative to renderer window size, so 'how many plane units per char' */
+
 /* In 10ths of a second */
 #define GAME_LOOP_DELAY 5
 
@@ -16,7 +19,7 @@
 // TODO: move into game.c
 #define BULLET_LIFESPAN 500
 #define BULLET_SPEED 200
-#define RECOIL_SPEED 10
+#define RECOIL_SPEED 5
 
 void game_loop(){
     int c = 0;
@@ -91,8 +94,10 @@ int main()
     rinit();    // renderer
     iinit();    //input
 
-    // Create a new game
-    gnew();
+
+    // Create a new game,
+    // taking note of the aspect ratio of the screen
+    gnew(rget_width()*GAME_SCALE, rget_height()*GAME_SCALE);
 
     // Create some asteroids
     gnew_wave();

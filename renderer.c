@@ -161,9 +161,9 @@ void plot_with_wrap(int c, int r, char ch){
 /* ------------------------------------------------------------------------- */
 // Ordinary rendering
 
-// Draw the ship
+// Return the ship's character for a given rotation
 #define PIPI (2*M_PI)
-char render_ship( positional_entity_t* e, float x, float y){
+char get_ship_char( positional_entity_t* e, float x, float y){
     orientation_t eo = e->orientation;
     
     char c = 's';
@@ -285,8 +285,9 @@ void render_entity( positional_entity_t* e ){
     switch(e->type){
         case ship:
             rotate( ship_bmp, ship_cache, e->orientation );
-            char ch = render_ship(e, ex, ey);
+            char ch = get_ship_char(e, ex, ey);
             subpixel(ship_cache, e, ch);
+            mvwprintw( main_win, round(ey), round(ex), "%c", ch);
             break;
         case asteroid:
 #ifdef ASTEROIDS_ROTATE
@@ -312,12 +313,14 @@ void rrender(game_state_t* current){
     // TODO: check if terminal has been resized( is_term_resized, man resizeterm(3x) and wresize).
 
     // Write score from game state
-    mvwprintw(score_win, 1, 1, "Lives: %d \t Score: %d \t Wave: %d \t Ship: %.0f%% (%.1f, %.1f) %s", 
+    mvwprintw(score_win, 1, 1, "Lives: %d \t Score: %d \t Wave: %d \t Ship: %.0f%% (%.1f, %.1f) %s %d,%d %d,%d", 
             current->lives, current->score, current->wave, 
             current->damage,
             current->player->dx,
             -1 * current->player->dy,
-            ((current->temporary_invulnerability > 0) ? "(inv.)" : "")
+            ((current->temporary_invulnerability > 0) ? "(inv.)" : ""),
+            current->bounds.xmin, current->bounds.ymin,
+            current->bounds.xmax, current->bounds.ymax
             );
 
 
@@ -367,3 +370,14 @@ void rsummarise_game( game_state_t* current ){
 
 /* ------------------------------------------------------------------------- */
 
+// Width of render pane, i.e. game world
+int rget_width(){
+    int wcmax, wrmax;
+    getmaxyx(main_win, wrmax, wcmax);
+    return wcmax;
+}
+int rget_height(){
+    int wcmax, wrmax;
+    getmaxyx(main_win, wrmax, wcmax);
+    return wrmax;
+}
