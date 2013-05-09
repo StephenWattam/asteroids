@@ -40,13 +40,13 @@ float pget_fwd_y(positional_entity_t* e, orientation_t o){
 void pmove(positional_entity_t* e, bounds_t* b){
     // Update X
     e->x += e->dx;
-    if(e->dx > 0 && e->x > b->xmax) e->x -= (b->xmax - b->xmin);    // wrapping >x
-    if(e->dx < 0 && e->x < b->xmin) e->x += (b->xmax - b->xmin);    // wrapping <x
+    while(e->x > b->xmax) e->x -= b->width;    // wrapping >x
+    while(e->x < b->xmin) e->x += b->width;    // wrapping <x
 
     // Update Y
     e->y += e->dy;
-    if(e->dy > 0 && e->y > b->ymax) e->y -= (b->ymax - b->ymin);    // wrapping >y
-    if(e->dy < 0 && e->y < b->ymin) e->y += (b->ymax - b->ymin);    // wrapping <y
+    while(e->y > b->ymax) e->y -= b->height;    // wrapping >y
+    while(e->y < b->ymin) e->y += b->height;    // wrapping <y
 
     // Apply angular momentum
     e->orientation += e->dor;

@@ -97,8 +97,8 @@ positional_entity_t* new_entity(scene_t* scene, entity_type_t type,
 
 
 // Create a new ship
-positional_entity_t* new_ship(scene_t* scene, float x, float y, float size){
-    return new_entity(scene, ship, x, y, 0, 0, 0.0, 0.0, size, -1, true, true);
+positional_entity_t* new_ship(scene_t* scene, float x, float y, float size, bool collides, bool friction){
+    return new_entity(scene, ship, x, y, 0, 0, 0.0, 0.0, size, -1, collides, friction);
 }
 
 

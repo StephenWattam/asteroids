@@ -28,6 +28,7 @@
 #define ASTEROID_MIN_FRAG 2 // minimum of two
 #define ASTEROID_MAX_FRAG 4 // max of 4
 #define ASTEROID_COLLISION_EXPLOSIVENESS 4 // inject energy during collisions 1=accurate
+#define ASTEROID_COLLISION_EXPLOSIVENESS_BOOST 10 // inject energy during collisions 0=accurate
 #define ASTEROID_COLLISION_OVERUNITY 1 // inject mass during collisions, 1= accurate
 
 // Wave properties
@@ -39,8 +40,10 @@
 #define START_LIVES 2
 #define NO_COLLISIONS false // turn off collisions entirely
 #define FRIENDLY_FIRE false // Can kill self with bullets
-#define INVULNERABILITY_COUNTER 1000 // Can't die within this time
+#define INVULNERABILITY_COUNTER 600 // Can't die within this time
 #define DAMAGE_PER_COLLISION 1 // damage this much per collision (in percent)
+#define SHIP_CAN_COLLIDE true   // Set to false for uber-cheat mode
+#define SHIP_EXPERIENCES_FRICTION true // should the ship slow down?
 
 
 typedef struct bounds{
@@ -98,7 +101,7 @@ void gnew(int width, int height){
     new_game->bounds.ymax   = height/2;
 
     // Create a new ship
-    new_game->player = new_ship(new_game->scene, 0, 0, SHIP_SIZE);
+    new_game->player = new_ship(new_game->scene, 0, 0, SHIP_SIZE, SHIP_CAN_COLLIDE, SHIP_EXPERIENCES_FRICTION);
 
     /* new_game. */
     current_game = new_game;
@@ -128,7 +131,7 @@ void hurt_player(){
         if(current_game->damage < 0){
             current_game->player->type = null;
             current_game->lives--;
-            current_game->player = new_ship(current_game->scene, 0, 0, SHIP_SIZE);
+            current_game->player = new_ship(current_game->scene, 0, 0, SHIP_SIZE, SHIP_CAN_COLLIDE, SHIP_EXPERIENCES_FRICTION);
 
             // Accounting
             current_game->temporary_invulnerability = INVULNERABILITY_COUNTER;
@@ -185,8 +188,8 @@ void split_asteroid(positional_entity_t* e){
             new_entity(current_game->scene, asteroid,
                     e->x + ((frand() - 0.5) * e->size*3),
                     e->y + ((frand() - 0.5) * e->size*3),
-                    (frand() - 0.5) * e->dx * ASTEROID_COLLISION_EXPLOSIVENESS,
-                    (frand() - 0.5) * e->dy * ASTEROID_COLLISION_EXPLOSIVENESS,
+                    (frand() - 0.5) * (ASTEROID_COLLISION_EXPLOSIVENESS_BOOST + e->dx) * ASTEROID_COLLISION_EXPLOSIVENESS,
+                    (frand() - 0.5) * (ASTEROID_COLLISION_EXPLOSIVENESS_BOOST + e->dy) * ASTEROID_COLLISION_EXPLOSIVENESS,
                     frand() * M_PI*2,
                     frand() * M_PI*2,
                     new_size,
@@ -216,8 +219,14 @@ void collision_check(positional_entity_t* e, int self){
             distance = sqrt(  (o->x - e->x) * (o->x - e->x) + 
                               (o->y - e->y) * (o->y - e->y) );
 
+
+            // debug
+            /* if(e->type == ship && o->type == asteroid){ */
+            /*     printf("[%.0f, %.0f, %.1f, %s]", o->x, e->x, distance, (distance < (o->size/2 + e->size/2) ? "T" : "F")); */
+            /* } */
+
             // Check 
-            if(distance < (o->size + e->size)){
+            if(distance < (o->size/2 + e->size/2)){
                 // collision
                 // Firstly, check type
                 if(e->type == bullet){

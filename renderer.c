@@ -166,7 +166,7 @@ char get_ship_char( positional_entity_t* e, float x, float y){
     char c = 's';
     if(eo < (1 * PIPI/8) || eo > (7 * PIPI/8) ) c = '^';     
     if(eo > (1 * PIPI/8) && eo < (3 * PIPI/8) ) c = '>';
-    if(eo > (3 * PIPI/8) && eo < (5 * PIPI/8) ) c = 'V';
+    if(eo > (3 * PIPI/8) && eo < (5 * PIPI/8) ) c = 'v';
     if(eo > (5 * PIPI/8) && eo < (7 * PIPI/8) ) c = '<';
 
     /* mvwprintw( main_win, round(y), round(x), "%c", c); */
@@ -417,3 +417,7 @@ int rget_height(){
     getmaxyx(main_win, wrmax, wcmax);
     return wrmax;
 }
+
+
+
+
