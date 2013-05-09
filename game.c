@@ -147,13 +147,13 @@ void gnew_wave(){
     float x, y, dx, dy, or, dor, size;
 
     for(int i=0; i<ASTEROIDS_PER_WAVE; i++){
-        x = frand() * (current_game->bounds.xmax - current_game->bounds.xmin) + current_game->bounds.xmin;
-        y = frand() * (current_game->bounds.ymax - current_game->bounds.ymin) + current_game->bounds.ymin;
-        dx = (frand() - 0.5) * ASTEROID_MOTION_VARIABILITY;
-        dy = (frand() - 0.5) * ASTEROID_MOTION_VARIABILITY;
-        or = frand() * (M_PI * 2);
-        dor = frand() * (M_PI * 2);
-        size = frand() * ASTEROID_SIZE_VARIABILITY + MIN_START_ASTEROID_SIZE;
+        x       = frand() * (current_game->bounds.xmax - current_game->bounds.xmin) + current_game->bounds.xmin;
+        y       = frand() * (current_game->bounds.ymax - current_game->bounds.ymin) + current_game->bounds.ymin;
+        dx      = (frand() - 0.5) * ASTEROID_MOTION_VARIABILITY;
+        dy      = (frand() - 0.5) * ASTEROID_MOTION_VARIABILITY;
+        or      = frand() * (M_PI * 2);
+        dor     = frand() * (M_PI * 2);
+        size    = frand() * ASTEROID_SIZE_VARIABILITY + MIN_START_ASTEROID_SIZE;
 
         new_entity(current_game->scene, asteroid, 
                 x, y, 
@@ -270,7 +270,6 @@ bool handle_game_logic(){
 
     // Check the scene
     scene_t* scene = current_game->scene;
-
     if(!NO_COLLISIONS){
         // Check each colliding object
         for(int i=0; i<=scene->max; i++){
@@ -280,6 +279,9 @@ bool handle_game_logic(){
             }
         }
     }
+
+    // Speed things up after killing objects
+    optimise_scene(current_game->scene);
 
     // New wave if the asteroid count == 0
     if(current_game->asteroid_count == 0){

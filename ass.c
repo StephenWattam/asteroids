@@ -64,19 +64,20 @@ void game_loop(){
                 ship = (gcurrent())->player;
 
                 // Create the bullet
-                new_entity(gcurrent()->scene, bullet, ship->x, ship->y, 
+                if(new_entity(gcurrent()->scene, bullet, ship->x, ship->y, 
                                 pget_fwd_x(ship, ship->orientation) * BULLET_SPEED, 
                                 -1 * pget_fwd_y(ship, ship->orientation) * BULLET_SPEED, 
                                 ship->orientation, 0.0, // bullets don't rotate
                                 BULLET_SIZE,
                                 BULLET_LIFESPAN, true, false
-                        );
+                        )){
 
-                // Recoil
-                paccel( ship, 
-                        -1 * pget_fwd_x(ship, ship->orientation) * RECOIL_SPEED, 
-                        pget_fwd_y(ship, ship->orientation) * RECOIL_SPEED, 
-                        0 );
+                    // Recoil
+                    paccel( ship, 
+                            -1 * pget_fwd_x(ship, ship->orientation) * RECOIL_SPEED, 
+                            pget_fwd_y(ship, ship->orientation) * RECOIL_SPEED, 
+                            0 );
+                }
 
                 break;
             case '-':

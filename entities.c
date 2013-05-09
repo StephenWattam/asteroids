@@ -45,8 +45,21 @@ typedef struct scene{
     positional_entity_t entities[MAX_ENTITIES];  // pointer to head of array
 } scene_t;
 
+// Shrink max to fit entity list in a scene.
+void optimise_scene(scene_t* scene){
+    int max=0;
+
+    // Loop over and find highest id
+    for(int i=0; i<=scene->max; i++)
+        if(scene->entities[i].type != null)
+            max = i;
+    
+    // Assign to max
+    scene->max = max;
+}
 
 
+// Create a new entity and return a pointer to it.
 void new_entity_raw(positional_entity_t* new, entity_type_t type, 
         float x, float y, float dx, float dy, 
         orientation_t orientation, orientation_t dorientation,
@@ -65,6 +78,7 @@ void new_entity_raw(positional_entity_t* new, entity_type_t type,
     new->friction = friction;
 }
 
+// Create a new entity in a given scene
 positional_entity_t* new_entity(scene_t* scene, entity_type_t type, 
         float x, float y, float dx, float dy, 
         orientation_t orientation, orientation_t dorientation,
