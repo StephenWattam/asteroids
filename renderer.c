@@ -310,14 +310,12 @@ void rrender(game_state_t* current){
     // TODO: check if terminal has been resized( is_term_resized, man resizeterm(3x) and wresize).
 
     // Write score from game state
-    mvwprintw(score_win, 1, 1, "Lives: %d \t Score: %d \t Wave: %d \t Ship: %.0f%% (%.1f, %.1f) %s %d,%d %d,%d", 
+    mvwprintw(score_win, 1, 1, "Lives: %d \t Score: %d \t Wave: %d \t Ship: %.0f%% (%.1f, %.1f) %s", 
             current->lives, current->score, current->wave, 
             current->damage,
             current->player->dx,
             -1 * current->player->dy,
-            ((current->temporary_invulnerability > 0) ? "(inv.)" : ""),
-            current->bounds.xmin, current->bounds.ymin,
-            current->bounds.xmax, current->bounds.ymax
+            ((current->temporary_invulnerability > 0) ? "(inv.)" : "")
             );
 
 
