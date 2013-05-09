@@ -8,6 +8,8 @@
 
 /* GAME_SCALE */
 #define GAME_SCALE 400  /* Relative to renderer window size, so 'how many plane units per char' */
+#define ZOOM_AMOUNT 0.1     /* Change the plane size by this amount each time */
+
 
 /* In 10ths of a second */
 #define GAME_LOOP_DELAY 5
@@ -20,6 +22,7 @@
 #define BULLET_LIFESPAN 500
 #define BULLET_SPEED 200
 #define RECOIL_SPEED 5
+
 
 void game_loop(){
     int c = 0;
@@ -76,6 +79,25 @@ void game_loop(){
                         0 );
 
                 break;
+            case '-':
+                // Zoom out/make plane larger
+                gredefine_bounds( gcurrent()->bounds.width * (1+ZOOM_AMOUNT), 
+                        gcurrent()->bounds.height * (1+ZOOM_AMOUNT) );
+                break;
+            case '+':
+                // Zoom in/make plane smaller
+                gredefine_bounds( gcurrent()->bounds.width * (1-ZOOM_AMOUNT), 
+                        gcurrent()->bounds.height * (1-ZOOM_AMOUNT) );
+                break;
+            case 'p':
+                // Pause
+                rpause_dialog( gcurrent() );
+                timeout(-1);
+                c = getch();
+                rclear_pause_dialog();
+                timeout( GAME_LOOP_DELAY );
+                break;
+                
 		}
 	}
 

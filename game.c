@@ -7,6 +7,11 @@
 #define SHIP_SIZE 2000
 #define BULLET_SIZE 10
 
+
+// Cannot make the plane below this size
+#define MIN_GAME_WIDTH 10000 
+#define MIN_GAME_HEIGHT 10000
+
 // Bullet properties
 /* #define BULLET_LIFESPAN 500 */
 /* #define BULLET_SPEED 200 */
@@ -39,6 +44,8 @@
 
 
 typedef struct bounds{
+    int width;
+    int height;
     int xmin;
     int xmax;
     int ymin;
@@ -81,9 +88,10 @@ void gnew(int width, int height){
     new_game->temporary_invulnerability = INVULNERABILITY_COUNTER;
     /* new_game->player     = &new_game->scene[0]; */
 
-
     // plane bounds.
-    // Computed from an aspect ratio and a diagonal size
+    new_game->bounds.width  = width;
+    new_game->bounds.height = height;
+
     new_game->bounds.xmin   = -width/2;
     new_game->bounds.ymin   = -height/2;
     new_game->bounds.xmax   = width/2;
@@ -94,6 +102,18 @@ void gnew(int width, int height){
 
     /* new_game. */
     current_game = new_game;
+}
+
+void gredefine_bounds(int width, int height){
+    if(height < MIN_GAME_HEIGHT || width < MIN_GAME_WIDTH) return;
+
+    // plane bounds.
+    current_game->bounds.width  = width;
+    current_game->bounds.height = height;
+    current_game->bounds.xmin   = -width/2;
+    current_game->bounds.ymin   = -height/2;
+    current_game->bounds.xmax   = width/2;
+    current_game->bounds.ymax   = height/2;
 }
 
 // Damage the player's ship and, possibly, destroy it.

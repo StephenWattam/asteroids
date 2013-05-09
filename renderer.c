@@ -18,6 +18,7 @@
 WINDOW* main_win;
 WINDOW* main_border;
 WINDOW* score_win;
+WINDOW* pause_win;
 
 
 // Transformation variables, re-used during rendering.
@@ -98,13 +99,9 @@ void compute_tranforms(bounds_t* bounds){
     float bxc = (bounds->xmax + bounds->xmin) / 2.0;
     float byc = (bounds->ymax + bounds->ymin) / 2.0;
 
-    // Compute bound width, height
-    float bw  = bounds->xmax - bounds->xmin;
-    float bh  = bounds->ymax - bounds->ymin;
-   
     // Compute scale
-    sw  = wcmax / bw;
-    sh  = wrmax / bh;
+    sw  = wcmax / (float)bounds->width;
+    sh  = wrmax / (float)bounds->height;
 
     // Compute translation
     // TODO/FIXME: currently clamped to 0, 0
@@ -172,7 +169,7 @@ char get_ship_char( positional_entity_t* e, float x, float y){
     if(eo > (3 * PIPI/8) && eo < (5 * PIPI/8) ) c = 'V';
     if(eo > (5 * PIPI/8) && eo < (7 * PIPI/8) ) c = '<';
 
-    mvwprintw( main_win, round(y), round(x), "%c", c);
+    /* mvwprintw( main_win, round(y), round(x), "%c", c); */
 
     return c;
 }
@@ -343,6 +340,47 @@ void rrender(game_state_t* current){
 }
 
 /* ------------------------------------------------------------------------- */
+
+
+// Show the pause dialog
+void rpause_dialog( game_state_t* current ){
+    if( pause_win ) return;
+
+    // Cnstruct windows
+    WINDOW* sum_win   = newwin( 10, 30, 6, 6 );
+    wbkgdset(main_win, ' ');
+    werase(sum_win);
+    box(sum_win, 0, 0);
+
+    // Write summary info
+    mvwprintw(sum_win, 1, 9, "Game Paused");
+    mvwprintw(sum_win, 2, 1, "----------------------------");
+    mvwprintw(sum_win, 4, 4, "Score: %d", current->score);
+    mvwprintw(sum_win, 5, 4, "Waves: %d", current->wave);
+    mvwprintw(sum_win, 7, 3, "Press a key to continue.");
+
+
+    // Refresh
+    wrefresh(sum_win);
+    refresh();
+}
+
+// Clear the pause window if one exists.
+void rclear_pause_dialog(){
+    if(!pause_win) return;
+
+    // Erase
+    werase(pause_win);
+    wborder(pause_win, ' ', ' ', ' ',' ',' ',' ',' ',' ');
+    wrefresh(pause_win);
+
+    // Destroy
+    delwin(pause_win);
+
+    // Set pointer to null
+    pause_win = 0;
+}
+
 
 void rsummarise_game( game_state_t* current ){
     
