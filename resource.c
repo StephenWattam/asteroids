@@ -11,11 +11,11 @@ typedef struct {
     short        reserved1;
     short        reserved2;
     unsigned int dataoffset;    /* offset in bytes to actual bitmap data */
-} file_header;
+} file_header_t;
 
 /* Windows 3.x bitmap full header, including file header */
 typedef struct {
-    file_header  fileheader;
+    file_header_t  fileheader;
     unsigned int headersize;
     int          width;
     int          height;
@@ -27,7 +27,7 @@ typedef struct {
     int          verticalres;
     unsigned int numcolors;
     unsigned int importantcolors;
-} bitmap_header;
+} bitmap_header_t;
 #pragma pack(pop)
 
 
@@ -43,15 +43,20 @@ bitmap_t* load_resource(char* filepath){
    
     // Open the file
     FILE * fp = fopen(filepath, "rb");
+    if(!fp) fail("Cannot open file %s\n", filepath);
 
     // Alloc and then read into the header format
-    bitmap_header* head = malloc(sizeof(bitmap_header));
-    fread(head, sizeof(bitmap_header), 1, fp);
+    bitmap_header_t* head = malloc(sizeof(bitmap_header_t));
+    if(!head) fail("Cannot allocate memory for bitmap (%s)\n", filepath);
+    if(!fread(head, sizeof(bitmap_header_t), 1, fp)) fail("Cannot load bitmap header %s\n", filepath);
+
+    if(head->fileheader.filetype[0] != 'B' || head->fileheader.filetype[1] != 'M') fail("File is not a bitmap: %s\n", filepath);
 
     // Read image data
     fseek(fp, sizeof(char) * head->fileheader.dataoffset, SEEK_SET);
     unsigned char* data = calloc(head->bitmapsize, sizeof(unsigned char));
-    fread(data, sizeof(char), head->bitmapsize, fp);
+    if(!head) fail("Cannot allocate memory for bitmap (%s)\n", filepath);
+    if(!fread(data, sizeof(char), head->bitmapsize, fp)) fail("Cannot read bitmap %s\n", filepath);
 
     // Check bitmap properties
     // FIXME
@@ -66,6 +71,7 @@ bitmap_t* load_resource(char* filepath){
     
     // Create some space...
     bitmap_t* new   = malloc(sizeof(bitmap_t));
+    if(!new) fail("Cannot construct new bitmap (%s)\n", filepath);
     new->bits       = calloc(head->bitmapsize / 3, sizeof(bool));    // probably not an issue, but
                                                                         // on most systems this is wasteful of memory.
 
@@ -101,22 +107,25 @@ bitmap_t* new_bmp(int w, int h){
     return new;
 }
 
+// Get a pixel from the bitmap
 bool bmp_get(bitmap_t* bmp, int x, int y){
     return bmp->bits[ bmp->width * y + x ];
 }
 
+// Put a pixel into the bitmap
 void bmp_put(bitmap_t* bmp, int x, int y, bool val){
     bmp->bits[ bmp->width * y + x ] = val;
 }
 
-void debug_draw_bmp(bitmap_t* bmp){
-
-    for(int i=0; i<bmp->width; i++){
-        for(int j=0; j<bmp->height; j++){
-            if(bmp->bits[i]) printf("#");
-            else printf(" ");
-        }
-        printf("\n");
-    }
-
-}
+// Draw a  bitmap to screen, for debug purposes
+/* void debug_draw_bmp(bitmap_t* bmp){ */
+/*  */
+/*     for(int i=0; i<bmp->width; i++){ */
+/*         for(int j=0; j<bmp->height; j++){ */
+/*             if(bmp->bits[i]) printf("#"); */
+/*             else printf(" "); */
+/*         } */
+/*         printf("\n"); */
+/*     } */
+/*  */
+/* } */

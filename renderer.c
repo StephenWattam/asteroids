@@ -40,7 +40,7 @@ bitmap_t* asteroid_cache;
 /* ------------------------------------------------------------------------- */
 
 /* Initialise the rendering system */
-void rinit(){
+bool rinit(){
 
     // Start curses mode
     initscr();			
@@ -67,6 +67,9 @@ void rinit(){
 #ifdef ASTEROIDS_ROTATE 
     asteroid_cache          = new_bmp(asteroid_bmp->width, asteroid_bmp->height);
 #endif
+
+    // Successful init
+    return true;
 }
 
 /* Tear down the rendering system */

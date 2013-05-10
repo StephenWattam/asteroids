@@ -1,3 +1,4 @@
+#include "util.c"
 #include <stdlib.h>
 #include <time.h>  // for PRNG seeding
 #include <ncurses.h>
@@ -12,7 +13,7 @@
 
 
 /* In 10ths of a second */
-#define GAME_LOOP_DELAY 5
+#define GAME_LOOP_DELAY 10 
 
 #define ROTATE_SPEED 0.004
 #define ACCEL_SPEED 10 
@@ -25,29 +26,30 @@
 
 
 void game_loop(){
-    int c = 0;
+    input_instruction_t c = null;
     positional_entity_t * ship;
 
-    /* halfdelay( GAME_LOOP_DELAY ); */
-    timeout( GAME_LOOP_DELAY );
+    iset_timeout( GAME_LOOP_DELAY );
 
-	while((c = getch()) != KEY_F(1)){	
-        piterate(gcurrent());
-        rrender(gcurrent());
-        if( ! handle_game_logic()) break;
+	while((c = iget()) != in_quit){	
+
+        // Iterate the game
+        rrender(gcurrent());                // Render
+        piterate(gcurrent());               // Physics
+        if( ! handle_game_logic()) break;   // Game logic
 
         switch(c){	
-            case KEY_LEFT:
+            case in_left:
                 // Rotate left
                 ship = (gcurrent())->player;
                 paccel( ship, 0, 0, -1 * ROTATE_SPEED);
 				break;
-			case KEY_RIGHT:
+			case in_right:
                 // Rotate right 
                 ship = (gcurrent())->player;
                 paccel( ship, 0, 0, ROTATE_SPEED);
 				break;
-			case KEY_UP:
+			case in_up:
                 // Accelerate 'forwards' based on current orientation
                 ship = (gcurrent())->player;
                 paccel( ship, 
@@ -55,11 +57,11 @@ void game_loop(){
                         -1 * pget_fwd_y(ship, ship->orientation) * ACCEL_SPEED, 
                         0 );
 				break;
-			case KEY_DOWN:
+			case in_down:
                 // warp
                 gwarp_player();
 				break;	
-            case ' ':
+            case in_fire:
                 // TODO: move into game.c
                 // Shoot
                 ship = (gcurrent())->player;
@@ -81,43 +83,43 @@ void game_loop(){
                 }
 
                 break;
-            case '-':
+            case in_zoom_out:
                 // Zoom out/make plane larger
                 gredefine_bounds( gcurrent()->bounds.width * (1+ZOOM_AMOUNT), 
                         gcurrent()->bounds.height * (1+ZOOM_AMOUNT) );
                 break;
-            case '+':
+            case in_zoom_in:
                 // Zoom in/make plane smaller
                 gredefine_bounds( gcurrent()->bounds.width * (1-ZOOM_AMOUNT), 
                         gcurrent()->bounds.height * (1-ZOOM_AMOUNT) );
                 break;
-            case 'p':
+            case in_pause:
                 // Pause
                 rpause_dialog( gcurrent() );
-                timeout(-1);
-                c = getch();
+                iset_blocking();
+                iget();
                 rclear_pause_dialog();
                 timeout( GAME_LOOP_DELAY );
                 break;
-                
 		}
 	}
 
 
     // Summary
     rsummarise_game( gcurrent() );
-    timeout(-1);
-    c = getch();
+    iset_blocking();
+    iget();
 }
 
 int main()
 {
+
     // Seed the PRNG
     srand(time(NULL));
 
-    rinit();    // renderer
-    iinit();    //input
-
+    // Pull up renderer and input system
+    if(!rinit()) fail("Failed to initialise renderer\n");    // renderer
+    if(!iinit()) fail("Failed to initialise input system\n");    //input
 
     // Create a new game,
     // taking note of the aspect ratio of the screen
@@ -129,6 +131,8 @@ int main()
     // Take input
     game_loop();
 
+    // Dealloc game
+    gdestroy();  // Dealloc gamgdestroy();;
 
     iteardown();    // input down
     rteardown();    // renderer down

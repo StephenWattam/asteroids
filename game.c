@@ -85,9 +85,19 @@ typedef struct game_state{
 // Current game state
 game_state_t* current_game;
 
+// Frees game memory
+void gdestroy(){
+    free(current_game);
+}
+
 // Make a new game with a given set of entities
 void gnew(int width, int height){
+    // Destroy current game if one exists
+    if(current_game) gdestroy(); 
+
+    // create new one in its stead
     game_state_t* new_game = (game_state_t*)malloc(sizeof(game_state_t));
+    if(!new_game) fail("Cannot allocate new game memory\n");
     
     new_game->score      = 0;
     new_game->wave       = 0;
@@ -326,3 +336,4 @@ bool handle_game_logic(){
 game_state_t* gcurrent(){
     return current_game;
 }
+
