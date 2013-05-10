@@ -1,11 +1,4 @@
-#include <math.h>
-
-// Handy for trig
-#define M_PI 3.14159265358979323846264338327
-
-// 0-1. 0 is low, 1 is high
-#define CARTESIAN_FRICTION 0.001
-#define ANGULAR_FRICTION 0.002
+#include "physics.h"
 
 /* ------------------------------------------------------------------------- */
 // Make an entity accelerate in a given direction
@@ -20,15 +13,6 @@ void pvel(positional_entity_t* e, float x, float y, orientation_t dor){
     e->dx   = x;
     e->dy   = y;
     e->dor  = dor;
-}
-
-
-// Returns the x component of a given orientation as a unit vector
-float pget_fwd_x(positional_entity_t* e, orientation_t o){
-    return sinf(o);
-}
-float pget_fwd_y(positional_entity_t* e, orientation_t o){
-    return cosf(o);
 }
 
 
@@ -51,6 +35,7 @@ void pmove(positional_entity_t* e, bounds_t* b){
     while(e->orientation < 0) e->orientation += 2*M_PI;
     while(e->orientation > 2*M_PI) e->orientation -= 2*M_PI;
 
+    // TODO: make ->friction a float
     if(e->friction){
         // Apply friction to deltas
         // this is complicated by the use of integer positioning.

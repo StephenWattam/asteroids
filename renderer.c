@@ -1,7 +1,8 @@
-#include <math.h> //rounding
-#include "resource.c"
+#include "renderer.h"
 
-#define M_PI 3.14159265358979323846264338327
+#include <ncurses.h>
+#include <math.h> //rounding
+#include "bitmap.c"
 
 // Where to find graphical resources.
 // Not used if images are turned off.
@@ -410,17 +411,23 @@ void rsummarise_game( game_state_t* current ){
 
 /* ------------------------------------------------------------------------- */
 
-// Width of render pane, i.e. game world
-int rget_width(){
+
+float rget_aspect(){
     int wcmax, wrmax;
     getmaxyx(main_win, wrmax, wcmax);
-    return wcmax;
+    return (float)wcmax/(float)wrmax;
 }
-int rget_height(){
+
+// In REAL units, as an expression of resolution
+//
+// For terminals, I presume characters are, diagonally, 
+// 1/10th of an inch
+float rget_diag_size(){
     int wcmax, wrmax;
     getmaxyx(main_win, wrmax, wcmax);
-    return wrmax;
+    return (float)sqrt( pow(wcmax, 2) + pow(wrmax, 2) ) / 10.0;
 }
+
 
 
 

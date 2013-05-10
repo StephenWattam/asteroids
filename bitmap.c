@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h> // C99
+#include "util.h"
 
 #pragma pack(push,1)
 /* Windows 3.x bitmap file header */
@@ -15,18 +16,18 @@ typedef struct {
 
 /* Windows 3.x bitmap full header, including file header */
 typedef struct {
-    file_header_t  fileheader;
-    unsigned int headersize;
-    int          width;
-    int          height;
-    short        planes;
-    short        bitsperpixel;  /* we only support the value 24 here */
-    unsigned int compression;   /* we do not support compression */
-    unsigned int bitmapsize;
-    int          horizontalres;
-    int          verticalres;
-    unsigned int numcolors;
-    unsigned int importantcolors;
+    file_header_t   fileheader;
+    unsigned int    headersize;
+    int             width;
+    int             height;
+    short           planes;
+    short           bitsperpixel;  /* we only support the value 24 here */
+    unsigned int    compression;   /* we do not support compression */
+    unsigned int    bitmapsize;
+    int             horizontalres;
+    int             verticalres;
+    unsigned int    numcolors;
+    unsigned int    importantcolors;
 } bitmap_header_t;
 #pragma pack(pop)
 
@@ -37,7 +38,6 @@ typedef struct bitmap{
     bool* bits;
 } bitmap_t;
 
-// FIXME: check the mallocs and reads work,
 // and all the file ops return sensible amounts
 bitmap_t* load_resource(char* filepath){
    
@@ -59,14 +59,16 @@ bitmap_t* load_resource(char* filepath){
     if(!fread(data, sizeof(char), head->bitmapsize, fp)) fail("Cannot read bitmap %s\n", filepath);
 
     // Check bitmap properties
-    // FIXME
-    //
     // if(!(head->bitsperpixel == 24 &&
     //    head->compression == 0 &&
     //    head->width == head->height )){ ... STUFF ... }
     /* printf("dim: %dx%d, bpp: %d compression: %d\n", head->width, head->height, head->bitsperpixel, head->compression); */
     /* printf("Offset: %d", head->fileheader.dataoffset); */
     /* printf("len: %d vs. %d\n", head->bitmapsize, (head->width * head->height * head->bitsperpixel) / sizeof(char)); */
+
+    if(head->width != head->height) fail("Bitmap must be square (%s)\n", filepath);
+    if(head->compression != 0) fail("Bitmap must be uncompressed (%s)\n", filepath);
+    if(head->bitsperpixel != 24) fail("Bitmap must 24 bits-per-pixel (%s)\n", filepath);
 
     
     // Create some space...

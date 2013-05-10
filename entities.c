@@ -1,52 +1,7 @@
-#define MAX_ENTITIES 100
-
-typedef enum entity_type{
-    ship,       // 0
-    asteroid,   // 1
-    bullet,     // 2
-    null        // 3
-} entity_type_t;
-
-// Orientation from north, in radians.
-typedef float orientation_t;
-
-typedef struct positional_entity{
-    entity_type_t type;
-    float x;
-    float y;
-    // function pointer to render, perhaps?
-    
-    // Velocity, vector encoded
-    float dx;
-    float dy;
-
-    // orientation.
-    orientation_t orientation;
-    orientation_t dor;  // angular momentum
-
-    // Size and bounding box
-    float size; // a radius for now...
-    
-    // Lifespan in physics ticks
-    int lifespan;
-
-    // True if this should collide with stuff, else false
-    // NB: colliding entities can hit non-colliding ones,
-    //     but not vice versa (NC+NC = nil, NC+C = C)
-    bool collides;
-    bool friction;
-
-} positional_entity_t;
-
-
-// Keeps a list of entities.
-typedef struct scene{
-    unsigned int max;               // Don't bother rendering over this number
-    positional_entity_t entities[MAX_ENTITIES];  // pointer to head of array
-} scene_t;
+#include "entities.h"
 
 // Shrink max to fit entity list in a scene.
-void optimise_scene(scene_t* scene){
+void eoptimise_scene(scene_t* scene){
     int max=0;
 
     // Loop over and find highest id
@@ -111,12 +66,12 @@ positional_entity_t* new_entity(scene_t* scene, entity_type_t type,
 
 
 // Create a new ship
-positional_entity_t* new_ship(scene_t* scene, float x, float y, float size, bool collides, bool friction){
+positional_entity_t* enew_ship(scene_t* scene, float x, float y, float size, bool collides, bool friction){
     return new_entity(scene, ship, x, y, 0, 0, 0.0, 0.0, size, -1, collides, friction);
 }
 
 
-scene_t* new_scene(){
+scene_t* enew_scene(){
     scene_t* new        = (scene_t*)malloc(sizeof(scene_t));
 
     // This one item is the player's ship.
@@ -129,3 +84,15 @@ scene_t* new_scene(){
     // return pointer
     return new;
 }
+
+
+
+// Returns the x component of a given orientation as a unit vector
+float eget_fwd_x(positional_entity_t* e, orientation_t o){
+    return sinf(o);
+}
+float eget_fwd_y(positional_entity_t* e, orientation_t o){
+    return cosf(o);
+}
+
+

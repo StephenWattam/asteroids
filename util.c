@@ -1,6 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
+#include "util.h"
 
 void fail(char* fmt, ...){
     va_list args;
