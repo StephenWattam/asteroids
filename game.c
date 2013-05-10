@@ -20,7 +20,7 @@
 // and asteroid properties
 #define ASTEROID_SIZE_VARIABILITY 2000
 #define MIN_START_ASTEROID_SIZE 2000
-#define ASTEROID_MOTION_VARIABILITY 200
+#define ASTEROID_MOTION_VARIABILITY 150 
 #define ASTEROIDS_COLLIDE false 
 #define ASTEROIDS_EXPERIENCE_FRICTION false 
 
@@ -35,6 +35,10 @@
 #define ASTEROIDS_PER_WAVE 4
 #define NEW_LIVES_PER_WAVE 1
 #define SCORE_PER_WAVE 20000
+#define WARPS_PER_WAVE 2
+#define ASTEROID_SPEED_INCREASE_PER_WAVE 20 // 30pt/tick faster
+#define ASTEROID_SIZE_INCREASE_PER_WAVE 30  // 30pt bigger per wave, randomly
+#define ASTEROID_COUNT_INCREASE_PER_WAVE 1  // One new asteroid per wave
 
 // Game properties
 #define START_LIVES 2
@@ -44,6 +48,7 @@
 #define DAMAGE_PER_COLLISION 1 // damage this much per collision (in percent)
 #define SHIP_CAN_COLLIDE true   // Set to false for uber-cheat mode
 #define SHIP_EXPERIENCES_FRICTION true // should the ship slow down?
+#define START_WARPS 0
 
 
 typedef struct bounds{
@@ -61,6 +66,7 @@ typedef struct game_state{
     int score;
     int lives;
     int wave;
+    int warps;
     int temporary_invulnerability;
     float damage;
 
@@ -86,6 +92,7 @@ void gnew(int width, int height){
     new_game->score      = 0;
     new_game->wave       = 0;
     new_game->lives      = START_LIVES;
+    new_game->warps      = START_WARPS;
     new_game->scene      = new_scene();
     new_game->damage     = 100.0;
     new_game->temporary_invulnerability = INVULNERABILITY_COUNTER;
@@ -119,6 +126,18 @@ void gredefine_bounds(int width, int height){
     current_game->bounds.ymax   = height/2;
 }
 
+// Warp the player somewhere random
+void gwarp_player(){
+    if(current_game->warps <= 0) return;
+
+    // Randomly position player
+    current_game->player->x = (((float)rand()/RAND_MAX) - 0.5) * current_game->bounds.width + current_game->bounds.xmin;
+    current_game->player->y = (((float)rand()/RAND_MAX) - 0.5) * current_game->bounds.height + current_game->bounds.ymin;
+
+    // Decrement allowed warps
+    current_game->warps--;
+}
+
 // Damage the player's ship and, possibly, destroy it.
 void hurt_player(){
 
@@ -146,14 +165,18 @@ void gnew_wave(){
 
     float x, y, dx, dy, or, dor, size;
 
-    for(int i=0; i<ASTEROIDS_PER_WAVE; i++){
+    //Increase wave count
+    current_game->wave ++;
+    
+    // Add some asteroids
+    for(int i=0; i<ASTEROIDS_PER_WAVE + (current_game->wave * ASTEROID_COUNT_INCREASE_PER_WAVE); i++){
         x       = frand() * (current_game->bounds.xmax - current_game->bounds.xmin) + current_game->bounds.xmin;
         y       = frand() * (current_game->bounds.ymax - current_game->bounds.ymin) + current_game->bounds.ymin;
-        dx      = (frand() - 0.5) * ASTEROID_MOTION_VARIABILITY;
-        dy      = (frand() - 0.5) * ASTEROID_MOTION_VARIABILITY;
+        dx      = (frand() - 0.5) * (ASTEROID_MOTION_VARIABILITY + (ASTEROID_SPEED_INCREASE_PER_WAVE * current_game->wave));
+        dy      = (frand() - 0.5) * (ASTEROID_MOTION_VARIABILITY + (ASTEROID_SPEED_INCREASE_PER_WAVE * current_game->wave));
         or      = frand() * (M_PI * 2);
         dor     = frand() * (M_PI * 2);
-        size    = frand() * ASTEROID_SIZE_VARIABILITY + MIN_START_ASTEROID_SIZE;
+        size    = frand() * ASTEROID_SIZE_VARIABILITY + MIN_START_ASTEROID_SIZE + (ASTEROID_SIZE_INCREASE_PER_WAVE * current_game->wave);
 
         new_entity(current_game->scene, asteroid, 
                 x, y, 
@@ -165,8 +188,9 @@ void gnew_wave(){
         current_game->asteroid_count ++;
     }
 
-    current_game->wave ++;
+    // Add on new lives and warps per wave
     current_game->lives += NEW_LIVES_PER_WAVE;
+    current_game->warps += WARPS_PER_WAVE;
 }
 
 

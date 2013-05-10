@@ -35,8 +35,6 @@ float pget_fwd_y(positional_entity_t* e, orientation_t o){
 /* ------------------------------------------------------------------------- */
 
 // Move with toroidal wrapping
-// TODO: move this to be a division-based algorithm? it's fast but it isn't totally 
-// foolproof for very fast things.
 void pmove(positional_entity_t* e, bounds_t* b){
     // Update X
     e->x += e->dx;

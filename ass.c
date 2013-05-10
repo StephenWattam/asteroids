@@ -15,7 +15,7 @@
 #define GAME_LOOP_DELAY 5
 
 #define ROTATE_SPEED 0.004
-#define ACCEL_SPEED 20 
+#define ACCEL_SPEED 10 
 
 // Bullet properties
 // TODO: move into game.c
@@ -55,9 +55,10 @@ void game_loop(){
                         -1 * pget_fwd_y(ship, ship->orientation) * ACCEL_SPEED, 
                         0 );
 				break;
-			/* case KEY_DOWN: */
-                // bugger all.
-			/* 	break;	 */
+			case KEY_DOWN:
+                // warp
+                gwarp_player();
+				break;	
             case ' ':
                 // TODO: move into game.c
                 // Shoot
