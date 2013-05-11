@@ -422,6 +422,7 @@ float rget_aspect(){
 //
 // For terminals, I presume characters are, diagonally, 
 // 1/10th of an inch
+#include <math.h>
 float rget_diag_size(){
     int wcmax, wrmax;
     getmaxyx(main_win, wrmax, wcmax);
