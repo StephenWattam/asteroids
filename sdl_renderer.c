@@ -84,8 +84,14 @@ bool rinit(){
     screen = SDL_SetVideoMode( 640, 480, 32, SDL_SWSURFACE );
 
     bmp_asteroid = SDL_LoadBMP("./resources/asteroid.bmp");
+    bmp_asteroid = SDL_DisplayFormat( bmp_asteroid );       // FIXME: this leaks, I think....
+    bmp_asteroid = rotozoomSurfaceXY( bmp_asteroid, 180., 1., 1., SMOOTHING_ON);      // FIXME, this definitely leaks
     bmp_ship     = SDL_LoadBMP("./resources/ship.bmp");
+    bmp_ship     = SDL_DisplayFormat( bmp_ship );
+    bmp_ship     = rotozoomSurfaceXY( bmp_ship, 180., 1., 1., SMOOTHING_ON);      // FIXME, this definitely leaks
     bmp_bullet   = SDL_LoadBMP("./resources/bullet.bmp");
+    bmp_bullet   = SDL_DisplayFormat( bmp_bullet );
+    bmp_bullet   = rotozoomSurfaceXY( bmp_bullet, 180., 1., 1., SMOOTHING_ON);      // FIXME, this definitely leaks
 
     // Create surfaces
     Uint32 rmask, gmask, bmask, amask;
@@ -131,9 +137,6 @@ void render_entity( positional_entity_t* e ){
     float ex    = trans_horz(e->x);
     float ey    = trans_vert(e->y);
 
-    // Find top-left x-y for the entity
-    struct SDL_Rect dst = {round(trans_horz(e->x)) - round(scale_horz(e->size)/2), 
-                           round(trans_horz(e->y)) - round(scale_vert(e->size)/2), 0, 0};
 
     
 
@@ -141,7 +144,7 @@ void render_entity( positional_entity_t* e ){
     SDL_Surface* bmp;
     switch(e->type){
         case ship:
-            printf("--> (%f, %f), %d %d\n", e->orientation, e->y, dst.x, dst.y);
+            /* printf("--> (%f, %f), %d %d\n", e->orientation, e->y, dst.x, dst.y); */
             bmp = bmp_ship;
             break;
         case asteroid:
@@ -153,21 +156,22 @@ void render_entity( positional_entity_t* e ){
     }
     
 
-    // TODO: scale, rotate (SDL_gfx ?)
-    //
-    // TODO: take into account original bitmap size (current scale factor is way off)
-		/* (SDL_Surface * src, double angle, double zoomx, double zoomy, int smooth); */
-    SDL_Surface* rotated = rotozoomSurfaceXY( bmp, 0.0, //e->orientation * (180.0/M_PI), 
-            1.,  /* sw * (bitmap->width / e->size) */
-            1., /* sh * (bitmap->height / e->size) */
-            0 // SMOOTHING_ON
+
+    // Rotate
+    SDL_Surface* rotated = rotozoomSurfaceXY( bmp, e->orientation * (-180.0/M_PI),  
+            scale_horz(e->size) / (float)bmp->w,//((float)e->size * (bmp->w * sw )),
+            scale_vert(e->size) / (float)bmp->h,//((float)e->size * (bmp->h * sw )), 
+            SMOOTHING_ON
             );
 
 
-    printf("Rotated: %d %d\n", rotated->w, rotated->h);
-    
+    // Find top-left x-y for the entity
+    struct SDL_Rect dst = {round(trans_horz(e->x) - (float)rotated->w/2.), /* position of centre in pixels minus half bitmap size*/
+                           round(trans_horz(e->y) - (float)rotated->h/2.), 0, 0};
+
+
     // Draw
-    SDL_BlitSurface( bmp, NULL, main_win, &dst);
+    SDL_BlitSurface( rotated, NULL, main_win, &dst);
 
     // TODO: don't alloc/free over and over...
     SDL_FreeSurface( rotated );
@@ -180,6 +184,11 @@ void render_entity( positional_entity_t* e ){
 void rrender(game_state_t* current){
 
     compute_tranforms(&current->bounds);
+
+    SDL_FillRect(main_win, NULL, SDL_MapRGBA(main_win->format,0,0,0, 0xff) );
+    SDL_FillRect(score_win, NULL, SDL_MapRGBA(main_win->format,0,0,0, 0xff) );
+    /* SDL_FillRect(score_win, NULL, 0x000000); */
+
 
     // Loop over entities in game and render them if not null
     for(int i=0; i<=current->scene->max; i++){
