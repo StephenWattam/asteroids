@@ -9,7 +9,7 @@
 
 // FIXME: remove these...
 #define CARTESIAN_FRICTION 0.001
-#define ANGULAR_FRICTION 0.002
+#define ANGULAR_FRICTION 0.004
 
 void paccel(positional_entity_t* e, float x, float y, orientation_t dor);
 void pvel(positional_entity_t* e, float x, float y, orientation_t dor);
